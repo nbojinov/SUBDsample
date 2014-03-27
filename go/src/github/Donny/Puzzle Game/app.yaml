@@ -8,16 +8,22 @@ handlers:
   static_files: \1
   upload: (.*\.(jpg|gif|png|css|html|js))
 
-- url: /animations
-  static_dir: \animations
-  
-
 - url: /.*
   script: _go_app
 
+
+- url: /js
+  static_dir: \js
+
+
 - url: /PuzzleGame.html
   static_files: \PuzzleGame.html
-  upload: \PuzzleGame.htmlW
+  upload: \PuzzleGame.html
+
+- url: /SignUp.html
+  static_files: \SignUp.html
+  upload: \SignUp.html
+
 
 - url: /updateScore
   script: _go_app
@@ -37,5 +43,6 @@ handlers:
 - url: /login
   script: HelloStuff.go
 
+- url: /signUp
+  script: HelloStuff.go
 
-  

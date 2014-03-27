@@ -7,8 +7,8 @@
 	<canvas id="Puzzle" width="600" height="600"></canvas>
 
 
-  <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-  <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+  <script src="/js/jquery-1.10.2.min.js"></script>
+  <script src="http://code.jquery.com/jquery-migrate-1.2.1.js"></script>
 
 	<script type="text/javascript">
 	function ImgMovable(x,y,source){
@@ -20,25 +20,29 @@
 	}
 
   var images = {};
+
 	function loadImages(sources,callback) {
         var numberOfSources = 0;
         var loadedImages = 0;
-        
+                
         for(var src in sources){
-        	numberOfSources++;
+            numberOfSources++
         }
-        
+
+
+
         var y = 0;
         var x = 0;
         var count = 0;
-        
-        for(var src in sources) {
+      
+
+        for(var src in sources){
           images[src] = new ImgMovable(x,y);
           images[src].image = new Image();
           images[src].image.onload = function() {
-          	if(numberOfSources <= ++loadedImages){
-          		callback(images);
-          	}
+            if(numberOfSources <= ++loadedImages){
+      	 	   callback(images);
+            }
           };
           images[src].image.src = sources[src];
           
@@ -51,7 +55,9 @@
 
         }
 
-      }
+  }
+
+  
 
       var canvas = document.getElementById('Puzzle');
       var context = canvas.getContext('2d');
@@ -62,36 +68,35 @@
         yoda: 'http://www.html5canvastutorials.com/demos/assets/yoda.jpg',
         obi_wan: 'http://img3.wikia.nocookie.net/__cb20111208191614/starwars/tr/images/5/5a/Obi2.jpg',
         count_dooku: 'http://img3.wikia.nocookie.net/__cb20091216160323/swfanon/images/thumb/b/b3/CountDooku.jpg/250px-CountDooku.jpg',
-        mace_windu: 'http://s2.quickmeme.com/img/36/36da73b03a3c8ba42912be0c03046ca891dd5156b1bce6789d3460fae46fe566.jpg'
+        mace_windu: 'http://s2.quickmeme.com/img/36/36da73b03a3c8ba42912be0c03046ca891dd5156b1bce6789d3460fae46fe566.jpg',
+        darth_sidious: 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTbGmtoIhg6lhwgDPdRgz6ohNyN8G0lvuPbaZP651xFDQUEGFFs8A',
+        luke: 'http://img4.wikia.nocookie.net/__cb20080319003050/starwars/nl/images/8/84/Lukeskywalker.jpg',
+        jar_jar: 'http://media.comicbook.com/wp-content/uploads/2013/03/Jar-Jar-Binks-Top-Tenz.jpg',
       };
 
-
-
-      loadImages(sources,function(){
-        var count = 0;
-        for(var img in images){
-
-          context.drawImage(images[img].image,
-                    images[img].x,images[img].y,
-                              200,200);
-        }
-    
-      });
+      loadImages(sources,function(data){
+          for(var src in sources){
+            context.drawImage(images[src].image,images[src].x,images[src].y,200,200);
+          }
+      });    
 
     $("#Puzzle").click(function(){
         var img = null;
         var x = event.pageX - $("#Puzzle").position().left;
         var y = event.pageY - $("#Puzzle").position().top;
+ 
         for(var image in images){
           var isIn = isImageClicked(x,y,images[image]) 
           if(isIn){
+
               img = images[image];
           }
         }
-        goToFreeSpace(img);
+        if(img != null)
+          goToFreeSpace(img);
 
 
-        redrawCanvas(images);
+
       });
    
     function redrawCanvas(images){
@@ -100,7 +105,7 @@
       context.clearRect(0,0,canvas.width,canvas.height);
 
       for(var img in images){
-        context.drawImage(images[img].image, images[img].x,images[img].y,200,200);
+         context.drawImage(images[img].image, images[img].x,images[img].y,200,200);
       }
     }
 
@@ -133,21 +138,75 @@
 
             if(images[img].x == (image.x - length) && images[img].y == image.y){
               left = true;
-            
             }
+          
         }
 
         if(!top){
-          image.y -= 200;
+          animate(image,"y",-200);                                                                                                                
         } else if(!right){
-          image.x += 200;
+          animate(image,"x",200);
         } else if(!bottom){
-          image.y += 200;
+          animate(image,"y",200);
         } else if(!left){
-          image.x -= 200;
+          animate(image,"x",-200);
         }
 
-        redrawCanvas(images);
+       // redrawCanvas(images)
+
+    }
+
+    function useAjax(method,urlString,dataString,callback){
+        $.ajax({
+           type: method,
+           url: urlString,
+           data: dataString,
+           dataType: 'json' 
+        }).done(function(data){
+            if(callback){
+              callback(data)
+            }
+        });
+    }
+
+    function animate(image,axis,delta){
+        
+          if(axis == "x"){
+            image.x += delta;
+          } else if(axis == "y"){
+            image.y += delta;
+          }
+
+          redrawCanvas(images);
+    }
+
+    function sleep(miliseconds){
+      var startTime = new Date().getTime();
+
+      while(true){
+          if((new Date().getTime() - startTime) >= miliseconds){
+            break;
+          }
+      }
+    }
+
+    function shuffle(imgs){
+      var temp = {}
+      for(var img in imgs){
+        
+      }
+    }
+
+    function checkIfOrdered(imgs){
+      var prev = 0;
+
+      for(var img in imgs){
+         if((prev+1) != imgs[img].num){
+            return false
+         }
+         prev = imgs[img].num;
+      }
+      return true;
     }
 
 	</script>
