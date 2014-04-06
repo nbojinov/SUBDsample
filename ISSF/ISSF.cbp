@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="ISSF" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/ISSF" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Wextra" />
+					<Add option="-Wall" />
+					<Add option="-ansi" />
+					<Add option="-pg" />
+					<Add option="-g" />
+					<Add directory="/home/donny/ISSF/" />
+					<Add directory="/usr/include" />
+					<Add directory="/usr/include/qt4" />
+					<Add directory="/usr/include/qt4/QtGui" />
+				</Compiler>
+				<Linker>
+					<Add option="-pg" />
+					<Add library="/usr/lib/libpcap.a" />
+					<Add library="/usr/lib/libpcap.so" />
+					<Add library="/usr/lib/libpcap.so.1" />
+					<Add library="/usr/lib/libdnet.so.2" />
+					<Add library="/usr/lib/libdnet.so.2.43.2" />
+					<Add library="/usr/lib/libdnet-dap.so.2.46.0" />
+					<Add library="/usr/lib/x86_64-linux-gnu/libQtGui.so" />
+					<Add library="/usr/lib/x86_64-linux-gnu/libQtCore.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libqgsttools_p.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5CLucene.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Concurrent.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Core.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5DBus.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Declarative.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Designer.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5DesignerComponents.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Gui.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Help.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Multimedia.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5MultimediaQuick_p.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5MultimediaWidgets.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Network.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5OpenGL.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5OpenGLExtensions.a" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5PlatformSupport.a" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5PrintSupport.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Qml.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5QmlDevTools.a" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Quick.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5QuickParticles.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5QuickTest.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Script.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5ScriptTools.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Sensors.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5SerialPort.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Sql.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Svg.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Test.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5UiTools.a" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5V8.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5WebKit.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5WebKitWidgets.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Widgets.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5X11Extras.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5Xml.so" />
+					<Add library="../QtSDK/5.1.1/gcc_64/lib/libQt5XmlPatterns.so" />
+					<Add library="/usr/lib/libboost_thread.a" />
+					<Add library="/usr/lib/libboost_thread-mt.a" />
+					<Add library="../../../usr/lib/libboost_date_time.a" />
+					<Add library="../../../usr/lib/libboost_date_time.so" />
+					<Add library="../../../usr/lib/libboost_date_time-mt.a" />
+					<Add library="../../../usr/lib/libboost_date_time-mt.so" />
+					<Add library="../../../usr/lib/libboost_system.a" />
+					<Add library="/usr/lib/x86_64-linux-gnu/libpthread.so" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/ISSF" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="EthernetFrame.cpp" />
+		<Unit filename="EthernetFrame.h" />
+		<Unit filename="HeaderTypes.h" />
+		<Unit filename="HelperFunctions.cpp" />
+		<Unit filename="HelperFunctions.h" />
+		<Unit filename="IPPacket.cpp" />
+		<Unit filename="IPPacket.h" />
+		<Unit filename="Makefile" />
+		<Unit filename="SharedMemoryClasses/Packet.cpp" />
+		<Unit filename="SharedMemoryClasses/Packet.h" />
+		<Unit filename="SharedMemoryClasses/PacketVector.h" />
+		<Unit filename="SharedMemoryClasses/SharedMemoryController.h" />
+		<Unit filename="TCPSegment.cpp" />
+		<Unit filename="TCPSegment.h" />
+		<Unit filename="ThreadControll/Thread.h" />
+		<Unit filename="WLANFrame.cpp" />
+		<Unit filename="WLANFrame.h" />
+		<Unit filename="findname.cpp" />
+		<Unit filename="findname.h" />
+		<Unit filename="include/LinkLayerData.h" />
+		<Unit filename="main.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

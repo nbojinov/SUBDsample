@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="HeaderTypes.h" open="0" top="0" tabpos="6">
+		<Cursor position="0" topLine="6" />
+	</File>
+	<File name="IPPacket.cpp" open="0" top="0" tabpos="3">
+		<Cursor position="0" topLine="56" />
+	</File>
+	<File name="SharedMemoryClasses/Packet.cpp" open="0" top="0" tabpos="2">
+		<Cursor position="854" topLine="13" />
+	</File>
+	<File name="SharedMemoryClasses/Packet.h" open="0" top="0" tabpos="0">
+		<Cursor position="415" topLine="10" />
+	</File>
+	<File name="TCPSegment.cpp" open="0" top="0" tabpos="4">
+		<Cursor position="0" topLine="33" />
+	</File>
+	<File name="ThreadControll/Thread.h" open="0" top="0" tabpos="3">
+		<Cursor position="207" topLine="0" />
+	</File>
+	<File name="findname.cpp" open="0" top="0" tabpos="5">
+		<Cursor position="0" topLine="51" />
+	</File>
+	<File name="main.cpp" open="0" top="0" tabpos="1">
+		<Cursor position="648" topLine="18" />
+	</File>
+</CodeBlocks_layout_file>
