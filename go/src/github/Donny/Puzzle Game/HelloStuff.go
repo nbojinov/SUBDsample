@@ -2,8 +2,8 @@ package main
 
 import (
 	"appengine"
-	"html/template"
 	"net/http"
+	"strings"
 )
 
 type Image struct{
@@ -12,20 +12,17 @@ type Image struct{
 
 
 func init(){
-	http.HandleFunc("/uploadForm",uploadForm)
 	http.HandleFunc("/upload",upload)
 	http.HandleFunc("/getPuzzle",handleGetUploadedImages)
 	http.HandleFunc("/login",handleLogin)
-	http.HandleFunc("/signUp",handleSignUp)
 	http.HandleFunc("/updateScore",handleUpdateHighscore)
+	http.HandleFunc("/saveGame",handleSaveGame)
+	http.HandleFunc("/getSaveGame",handleGetSaveGame)
+	http.HandleFunc("/deleteGame",handleDeleteGame)
+	http.HandleFunc("/logout",handleLogout)
 }
 
-const uploadTemplate = "<html><body><form action='{{.}}' method='POST' enctype='multipart/form-data'>Upload File: <input type='file' name='file'><br><input type='submit' name='submit' value='Submit'></form></body></html>";
-func uploadForm(rw http.ResponseWriter, r *http.Request){
-	uploadUrl := UploadImageUrl(rw,	r)	
 
-	template.Must(template.New("upload").Parse(uploadTemplate)).Execute(rw,uploadUrl)
-}
 
 func upload(rw http.ResponseWriter, r *http.Request){
 	UploadImage(rw,r)
@@ -38,25 +35,38 @@ func handleGetUploadedImages(rw http.ResponseWriter,r *http.Request){
 }
 
 func handleLogin(rw http.ResponseWriter, r *http.Request){
-	
+	UserGoogleLogin(rw,r)
 }
 
-func handleSignUp(rw http.ResponseWriter,r *http.Request){
-	context := appengine.NewContext(r)
-	username := r.FormValue("username")
-	if r.FormValue("pass") == r.FormValue("repeat_pass"){
-		pass := r.FormValue("pass")
 
-		if err := AddUser(context,username,pass); err != nil{
-			http.Error(rw,err.Error(),http.StatusInternalServerError)
-		}
-
-	} else {
-		http.Error(rw,"Passwords don't match",http.StatusInternalServerError)
-	}
-	http.Redirect(rw,r,"/PuzzleGame.html",http.StatusFound)
-}
 
 func handleUpdateHighscore(rw http.ResponseWriter, r *http.Request){
-	
+	context := appengine.NewContext(r)
+	if err := UpdateHighscores(context,r); err != nil{
+		http.Error(rw,err.Error(),http.StatusInternalServerError)
+	}
+}
+
+func handleSaveGame(rw http.ResponseWriter, r *http.Request){
+	context := appengine.NewContext(r)
+	if err := UploadGameSave(context,r); err != nil{
+		http.Error(rw,err.Error(),http.StatusInternalServerError)
+	}
+
+}
+
+func handleGetSaveGame(rw http.ResponseWriter, r *http.Request){
+	GetGameSave(rw,r)
+}
+
+func handleDeleteGame(rw http.ResponseWriter, r *http.Request){
+	context := appengine.NewContext(r)
+	mail := strings.Split(r.URL.String(),"=")[1]
+	if err:=DeleteMoves(mail,context); err!=nil{
+		http.Error(rw,err.Error(),http.StatusInternalServerError)
+	}
+}
+
+func handleLogout(rw http.ResponseWriter, r *http.Request){
+	UserGoogleLogout(rw,r)
 }

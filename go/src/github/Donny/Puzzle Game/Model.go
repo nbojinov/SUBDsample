@@ -1,14 +1,17 @@
 package main;
 
 import(
-	"errors"
+
 	"appengine/blobstore"
 	"appengine/datastore"
 	"appengine"
 	"appengine/image"
 	"net/http"
 	"net/url"
-//	"fmt"
+	"encoding/json"
+	"appengine/user"
+	"fmt"
+	"strings"
 )
 
 type Puzzles struct{
@@ -16,9 +19,17 @@ type Puzzles struct{
 	ImageBlobKeys string
 }
 
-type User struct{
-	Username string
-	Password string
+
+type HighScore struct{
+	Username_mail string
+	Highscore int
+}
+
+type User_Game struct{
+	Username_mail string
+	Move int
+	Indexes string
+	Positions string
 }
 
 
@@ -91,43 +102,114 @@ func ParentDatastoreKey(context appengine.Context, entityName string, databaseNa
 	return datastore.NewKey(context, entityName, databaseName, 0, nil);
 }
 
-//adding a user
-func AddUser(context appengine.Context, username string, pass string) (error) {
-	users := make([]User,0,1)
-	q := datastore.NewQuery("User").Ancestor(ParentDatastoreKey(context,"User","game_users")).
-			Filter("Username=",username).Filter("Password=",pass)
-	if _,err := q.GetAll(context,&users); err != nil {
+
+
+func UpdateHighscores(context appengine.Context,r *http.Request)( error ){
+
+	decoder := json.NewDecoder(r.Body)
+	highscore := HighScore{}
+	if err:=decoder.Decode(&highscore); err!=nil{
 		return err
-	} else if len(users) >= 1{
-		return errors.New("There are already other users")		
+	}
+	highscores := make([]HighScore,0,1)
+	q := datastore.NewQuery("User").Ancestor(ParentDatastoreKey(context,"HighScore","highscores")).Filter("Username_mail=",highscore.Username_mail)
+	keys,errq := q.GetAll(context,&highscores)
+	if  errq != nil{
+		return errq
+	} 
+
+	if len(highscores) == 1{
+		if _,errput:= datastore.Put(context,keys[0],&highscore); errput != nil{
+			return errput
+		}
+	} else if len(highscores) == 0{
+			if _,errput:= datastore.Put(context,datastore.NewIncompleteKey(context,"HighScore",ParentDatastoreKey(context,"HighScore","highscores")),&highscore); 
+			errput != nil{
+				return errput
+			}
+	}
+	return nil
+}
+
+func UserGoogleLogin(rw http.ResponseWriter, r *http.Request){
+	context := appengine.NewContext(r)
+	usr := user.Current(context)
+	if usr == nil{
+		url, err := user.LoginURL(context,"/PuzzleGame.html")
+		if err != nil{
+			http.Error(rw,err.Error(),http.StatusInternalServerError)
+			return
+		}
+		rw.Header().Set("Location",url)
+		rw.WriteHeader(http.StatusFound)
+		return 
 	}
 
-	user := User{
-		Username: username,
-		Password: pass,
+	http.Redirect(rw,r,"/PuzzleGame.html",http.StatusFound)
+}
+
+
+func UserGoogleLogout(rw http.ResponseWriter, r *http.Request){
+	context := appengine.NewContext(r)
+	if dest, err := user.LogoutURL(context,"/login"); err == nil{
+		rw.Header().Set("Location",dest)
+		rw.WriteHeader(http.StatusFound)
+	} else {
+		http.Error(rw,err.Error(),http.StatusInternalServerError)
 	}
 
-	if _,err := datastore.Put(context,
-		datastore.NewIncompleteKey(context,"User",ParentDatastoreKey(context,"User","game_users")),&user);
-	err != nil{
+}
+
+func UploadGameSave(context appengine.Context, r *http.Request)( error ){
+	game_save_data := User_Game{}
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&game_save_data); err!=nil{
 		return err
+	}
+	  	
+	if _,errput:= datastore.Put(context,datastore.NewIncompleteKey(context,"User_Game",
+	ParentDatastoreKey(context,"User_Game","saves")),&game_save_data); 
+	errput != nil{
+		return errput
 	}
 
 	return nil
 }
 
+func GetGameSave(rw http.ResponseWriter,r *http.Request){
+	mail := strings.Split(r.URL.String(),"=")[1]
+	context := appengine.NewContext(r)
+	saves:= make([]User_Game,0,25)
 
-func checkIfUser(context appengine.Context, username string, pass string) (bool,error){
+	q := datastore.NewQuery("User_Game").Ancestor(ParentDatastoreKey(context,"User_Game","saves")).
+			Filter("Username_mail=",mail).Order("Move")
 
-	q := datastore.NewQuery("User").Ancestor(ParentDatastoreKey(context,"User","game_users")).Filter("Username=",username).
-			Filter("Password=",pass)
-	user := make([]User,0,1)
-
-	if _,err := q.GetAll(context,&user); err != nil || len(user) == 0 {
-		return false,err
-	} else {
-		return true,nil
+    if _,err := q.GetAll(context,&saves); err != nil{
+    	http.Error(rw,err.Error(),http.StatusInternalServerError)
 	}
 
+
+	save_game := ""
+	if(len(saves) != 0){
+		save_data,errJson := json.Marshal(saves)
+		if errJson != nil{
+			http.Error(rw,errJson.Error(),http.StatusInternalServerError)
+		}
+	
+		save_game = fmt.Sprintf("%s",save_data)
+	}
+	rw.Header().Set("Content-type","application/json")
+	fmt.Fprintf(rw,save_game)
 }
 
+func DeleteMoves(mail string, context appengine.Context)(error){
+	q := datastore.NewQuery("User_Game").Ancestor(ParentDatastoreKey(context,"User_Game","saves")).
+			Filter("Username_mail=",mail)
+	saves := make([]User_Game,0,10)
+	if keys,err := q.GetAll(context,&saves); err == nil{
+		datastore.DeleteMulti(context,keys)
+	} else{
+		return err
+	}
+	return nil
+}

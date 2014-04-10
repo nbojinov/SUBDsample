@@ -19,11 +19,16 @@ handlers:
 - url: /PuzzleGame.html
   static_files: \PuzzleGame.html
   upload: \PuzzleGame.html
+  login: required
+
 
 - url: /SignUp.html
   static_files: \SignUp.html
   upload: \SignUp.html
 
+- url: /LogIn.html
+  static_files: \LogIn.html
+  upload: \LogIn.html
 
 - url: /updateScore
   script: _go_app
@@ -42,7 +47,16 @@ handlers:
 
 - url: /login
   script: HelloStuff.go
+  login: required
 
-- url: /signUp
+- url: /getSaveGame
   script: HelloStuff.go
 
+- url: /saveGame
+  script: HelloStuff.go
+
+- url: /deleteGame
+  script: HelloStuff.go
+  
+- url: /logout
+  script: HelloStuff.go

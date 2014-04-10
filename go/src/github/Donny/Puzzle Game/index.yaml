@@ -15,3 +15,9 @@ indexes:
   properties:
   - name: Date
     direction: desc
+
+- kind: User_Game
+  ancestor: yes
+  properties:
+  - name: Username_mail
+  - name: Move

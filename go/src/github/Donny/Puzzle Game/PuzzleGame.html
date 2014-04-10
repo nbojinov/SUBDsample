@@ -4,13 +4,44 @@
 	<title>Puzzle Game</title>
 </head>
 <body>
-	<canvas id="Puzzle" width="600" height="600"></canvas>
+	<canvas id="Puzzle" width="600" height="600"></canvas><br/>
+  <form action="/logout" method="POST">
+    <input type="submit" value="Logout" id="logout">
+  </form>
+
+  <div style="postion: relative;margin-left:650px;margin-top:-630px;">
+    <table id="moveTable">
+
+    </table><br/>
+    <button id="prev">Prev</button>
+    <button id="next">Next</button>
+    <button>Start</button>
+    <button id="del">Delete Game</button>
+  </div>
 
 
   <script src="/js/jquery-1.10.2.min.js"></script>
   <script src="http://code.jquery.com/jquery-migrate-1.2.1.js"></script>
+  <script src="/js/jquery.mustache.js"></script>
+  <script src="/js/mustache.js"></script>
+  <script src="/js/jquery.color.js"></script>
+
+
+
+  <script id="moveTemplate" type="text/html">
+      <tr data-move='{{Move}}' data-indexes='{{Indexes}}' data-pos='{{Positions}}'>
+          <td>{{Move}}</td> 
+      </tr>
+
+  </script>
 
 	<script type="text/javascript">
+  $.Mustache.addFromDom();
+ 
+  var isSecond = 0;
+  var move = 1;
+  var moves = [];
+  var nextHiden = false;
 	function ImgMovable(x,y,source){
 		this.image = null;
 		this.x = x;
@@ -18,10 +49,13 @@
     this.num = null;
 		
 	}
+  
 
-  var images = {};
+  var mail = document.cookie.split("=")[1].split(":")[0].replace("\"","");
 
-	function loadImages(sources,callback) {
+      var images = {};
+      var start = new Date().getTime();
+	    function loadImages(sources,callback) {
         var numberOfSources = 0;
         var loadedImages = 0;
                 
@@ -34,31 +68,26 @@
         var y = 0;
         var x = 0;
         var count = 0;
-      
+        var index = 1;
+
 
         for(var src in sources){
-          images[src] = new ImgMovable(x,y);
+          images[src] = new ImgMovable(0,0);
           images[src].image = new Image();
-          images[src].image.onload = function() {
+          images[src].image.onload = function(data) {
             if(numberOfSources <= ++loadedImages){
       	 	   callback(images);
             }
           };
-          images[src].image.src = sources[src];
-          
-          y += 200;
-          if((++count) == 3){
-            x+=200;
-            y = 0;
-            count = 0;
+
+          if(sources[src] != ""){
+            images[src].image.src = sources[src];
           }
-
+          images[src].num = index++;
         }
-
-  }
+      }
 
   
-
       var canvas = document.getElementById('Puzzle');
       var context = canvas.getContext('2d');
     	
@@ -71,14 +100,126 @@
         mace_windu: 'http://s2.quickmeme.com/img/36/36da73b03a3c8ba42912be0c03046ca891dd5156b1bce6789d3460fae46fe566.jpg',
         darth_sidious: 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTbGmtoIhg6lhwgDPdRgz6ohNyN8G0lvuPbaZP651xFDQUEGFFs8A',
         luke: 'http://img4.wikia.nocookie.net/__cb20080319003050/starwars/nl/images/8/84/Lukeskywalker.jpg',
-        jar_jar: 'http://media.comicbook.com/wp-content/uploads/2013/03/Jar-Jar-Binks-Top-Tenz.jpg',
+        jar_jar: 'http://media.comicbook.com/wp-content/uploads/2013/03/Jar-Jar-Binks-Top-Tenz.jpg'
       };
+          useAjax("GET","/getSaveGame?Username_mail=" + mail,null,function(data){
+            move = data ? data.length: 0;
 
-      loadImages(sources,function(data){
-          for(var src in sources){
+            $('#moveTable').mustache('moveTemplate',data);
+          });
+  
+        loadImages(sources,function(data){
+          images = shuffle(images);
+          var tempx = 0;
+          var tempy = 0;
+          var count = 0;
+          if(move == 0){  
+            for(var img in images){
+              images[img].x = tempx;
+              images[img].y = tempy;
+
+              tempx += 200;
+              if((++count) == 3){
+                tempy+=200;
+                tempx = 0;
+                count = 0;
+              }
+            }
+            var i = 0;
+            var positions = [];  
+            var indexes=[];  
+            for(var img in images){
+              indexes[i] = images[img].num;
+              positions[i] = [images[img].x,images[img].y];
+              i++;
+            }
+            
+            var saveGame = {
+              "Username_mail": mail,
+              "Move" : ++move,
+              "Indexes" : indexes.toString(),
+              "Positions": positions.toString()
+            };
+            useAjax("POST","/saveGame",saveGame,null);
+            useAjax("GET","/getSaveGame?Username_mail=" + mail,null,function(data){
+                $("#moveTable").empty();
+                $("#moveTable").mustache('moveTemplate',data);
+            });
+            moves[move-1] = saveGame;
+          } else {
+            var element = $('[data-move=' + move + ']');
+            var indexes = JSON.parse("[" + element.first().data('indexes') + "]");
+            var pos = JSON.parse("[" + element.first().data('pos') + "]");
+
+            var posx, posy;
+            for(var img in images){
+              for(var i = 0; i < indexes.length; i++){
+                if(images[img].num == indexes[i]){
+                  images[img].x = pos[i*2];
+                  images[img].y = pos[i*2+1];
+                }
+              }
+            }
+          }
+          for(var src in images){
             context.drawImage(images[src].image,images[src].x,images[src].y,200,200);
           }
       });    
+
+    $("#del").click(function(){
+      useAjax("DELETE","/deleteGame?Username_mail=" + mail,null,function(){
+        move = 1;
+        $("#moveTable").empty();
+      });
+    });
+
+    $("#next").click(function(){
+        if(move < $('td').length)
+        move++;
+        //$('td').css({color: 'black'});
+        $('tr').animate({color: 'black'});
+        $("[data-move="+move+"]").animate({color: 'red'});
+        var element = $('[data-move=' + move + ']');
+        var indexes = JSON.parse("[" + element.first().data('indexes') + "]");
+        var pos = JSON.parse("[" + element.first().data('pos') + "]");
+
+        for(var img in images){
+          for(var i = 0; i < indexes.length; i++){
+            if(images[img].num == indexes[i]){
+              images[img].x = pos[i*2];
+              images[img].y = pos[i*2+1];
+            }
+          }
+        }
+        redrawCanvas(images);
+    });
+
+    $("#prev").click(function(){
+        if(move > 1)
+          move--;
+     
+        $('tr').animate({color: 'black'});
+        $("[data-move="+move+"]").animate({color: 'red'});
+        var element = $('[data-move=' + move + ']');
+        var indexes = JSON.parse("[" + element.first().data('indexes') + "]");
+        var pos = JSON.parse("[" + element.first().data('pos') + "]");
+        if(nextHiden){
+          $('#next').show();
+        }
+        nextHiden = false;
+
+        for(var img in images){
+          for(var i = 0; i < indexes.length; i++){
+            if(images[img].num == indexes[i]){
+              images[img].x = pos[i*2];
+              images[img].y = pos[i*2+1];
+            }
+          }
+        }
+        redrawCanvas(images);
+        
+    });
+
 
     $("#Puzzle").click(function(){
         var img = null;
@@ -95,7 +236,49 @@
         if(img != null)
           goToFreeSpace(img);
 
+        useAjax("DELETE","/deleteGame?Username_mail=" + mail,null,null);
+            
+        for(var m = 0; m < move; m++){  
+          useAjax("POST","/saveGame",moves[m],null);
+        }
+       
 
+        var i = 0;
+        var positions = [];  
+        var indexes=[];  
+        for(var img in images){
+          indexes[i] = images[img].num;
+          positions[i] = [images[img].x,images[img].y];
+          i++;
+        }
+
+        var savedMove = {
+          "Username_mail": mail,
+          "Move" :move,
+          "Indexes": indexes.toString(),
+          "Positions": positions.toString()
+
+        }
+        useAjax("POST","/saveGame",savedMove,null);
+        moves[move-1] = savedMove;
+        move++;
+
+        if(checkIfOrdered(images)){
+          var json = {
+              "Username_mail" : mail,
+              "Highscore" : ((new Date().getTime()) - start)*10
+          }
+          useAjax("POST","/updateScore",json,null);
+        }
+        useAjax("GET","/getSaveGame?Username_mail="+mail,null,function(data){
+            $("#moveTable").empty();
+            $("#moveTable").mustache('moveTemplate',data);
+        });
+        nextHiden = true;
+        $('#next').hide();
+      });
+
+      $("#logout").click(function(){
 
       });
    
@@ -143,13 +326,15 @@
         }
 
         if(!top){
-          animate(image,"y",-200);                                                                                                                
+          animate(image,"y",-200);    
         } else if(!right){
-          animate(image,"x",200);
+          animate(image,"x",200);    
+     
         } else if(!bottom){
-          animate(image,"y",200);
+          animate(image,"y",200);    
+     
         } else if(!left){
-          animate(image,"x",-200);
+          animate(image,"x",-200);    
         }
 
        // redrawCanvas(images)
@@ -160,8 +345,9 @@
         $.ajax({
            type: method,
            url: urlString,
-           data: dataString,
-           dataType: 'json' 
+           data: dataString ? JSON.stringify(dataString) : "",
+           dataType: 'json', 
+           contentType:"application/json; charset=UTF-8"
         }).done(function(data){
             if(callback){
               callback(data)
@@ -191,24 +377,79 @@
     }
 
     function shuffle(imgs){
-      var temp = {}
-      for(var img in imgs){
-        
+      var temp = {};
+      var tempLength = 0
+      while(tempLength < 8){
+        var num = randNumTo8();
+        for(var img in imgs){
+          if(imgs[img].num == num){
+            if(!checkIfUsed(temp,num)){
+              temp[img] = imgs[img];
+              tempLength++;
+            }
+          }
+        }
       }
+      return temp;
     }
 
     function checkIfOrdered(imgs){
       var prev = 0;
 
-      for(var img in imgs){
-         if((prev+1) != imgs[img].num){
-            return false
-         }
-         prev = imgs[img].num;
+      for(var x = 0; x < 400; x += 200){
+        for(var img in imgs){
+          if(imgs[img].y == 0 && imgs[img].x == x){
+            if((imgs[img].num - 1) != prev){
+              return false;
+            } else prev=imgs[img].num
+          } 
+        }
       }
+
+      for(var x = 0; x < 400; x += 200){
+        for(var img in imgs){
+          if(imgs[img].y == 200 && imgs[img].x == x){
+            if((imgs[img].num - 1) != prev){
+              return false;
+            } else prev=imgs[img].num
+          } 
+        }
+      }
+
+      for(var x = 0; x < 400; x += 200){
+        for(var img in imgs){
+          if(imgs[img].y == 400 && imgs[img].x == x){
+            if((imgs[img].num - 1) != prev){
+              return false;
+            } else prev=imgs[img].num
+          } 
+        }
+      }
+      
       return true;
     }
 
+    function checkIfUsed(imgs, num){
+      for(var img in imgs){
+        if(imgs[img].num == num)
+          return true;
+      }
+      return false;
+    }
+
+    function randNumTo8(){
+      return Math.floor((Math.random()*8)+1);
+    }
+
+    function findImage(x,y){
+      for(var img in images){
+        if(images[img].x == x){
+          if(images[img].y == y){
+            return images[img];
+          }
+        }
+      }
+    }
 	</script>
 
 </body>
