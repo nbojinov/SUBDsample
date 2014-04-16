@@ -2,21 +2,25 @@
 <html>
 <head>
 	<title>Puzzle Game</title>
+<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-	<canvas id="Puzzle" width="600" height="600"></canvas><br/>
-  <form action="/logout" method="POST">
-    <input type="submit" value="Logout" id="logout">
-  </form>
+  <div class="container panel">
+  	<canvas class="row lead" id="Puzzle" width="600" height="600"></canvas><br/>
+    <form action="/logout" method="POST">
+      <input class="btn btn-default row col-md-4" type="submit" value="Logout" id="logout">
+    </form>
+  </div>
+  
+ 
 
-  <div style="postion: relative;margin-left:650px;margin-top:-630px;">
-    <table id="moveTable">
+  <div class="container" style="postion: relative;margin-left:750px;margin-top:-630px;">
+    <table clas="row table tables-striped table-responsive" id="moveTable">
 
     </table><br/>
-    <button id="prev">Prev</button>
-    <button id="next">Next</button>
-    <button>Start</button>
-    <button id="del">Delete Game</button>
+    <button class="btn btn-defualt" id="prev">Prev</button>
+    <button class="btn btn-defualt" id="next">Next</button>
+    <button class="btn btn-defualt" id="del">Delete Game</button>
   </div>
 
 
@@ -104,7 +108,7 @@
       };
           useAjax("GET","/getSaveGame?Username_mail=" + mail,null,function(data){
             move = data ? data.length: 0;
-
+            moves = data;
             $('#moveTable').mustache('moveTemplate',data);
           });
   
@@ -235,7 +239,7 @@
         }
         if(img != null)
           goToFreeSpace(img);
-
+        else return;
       
         
         var temp = [];    
@@ -264,8 +268,14 @@
         moves[move-1] = savedMove;
         
         useAjax("DELETE","/deleteGame?Username_mail=" + mail,null,function(){
-          useAjax("POST","/saveGames",moves,null);
+          useAjax("POST","/saveGames",moves,function(){
+            useAjax("GET","/getSaveGame?Username_mail="+mail,null,function(data){
+              $("#moveTable").empty();
+              $("#moveTable").mustache('moveTemplate',data);
+            });
+          }); 
         });
+        
         if(checkIfOrdered(images)){
           var json = {
               "Username_mail" : mail,
@@ -273,10 +283,7 @@
           }
           useAjax("POST","/updateScore",json,null);
         }
-        useAjax("GET","/getSaveGame?Username_mail="+mail,null,function(data){
-            $("#moveTable").empty();
-            $("#moveTable").mustache('moveTemplate',data);
-        });
+    
         nextHiden = true;
         $('#next').hide();
       });

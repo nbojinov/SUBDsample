@@ -15,6 +15,18 @@ handlers:
 - url: /js
   static_dir: \js
 
+- url: /bootstrap
+  static_dir: \bootstrap
+
+- url: /bootstrap/css
+  static_dir: \bootstrap\css
+
+- url: /bootstrap/js
+  static_dir: \bootstrap\js
+
+- url: /bootstrap/fonts
+  static_dir: \bootstrap\fonts
+
 
 - url: /PuzzleGame.html
   static_files: \PuzzleGame.html
