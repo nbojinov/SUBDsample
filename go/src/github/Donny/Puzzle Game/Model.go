@@ -213,3 +213,24 @@ func DeleteMoves(mail string, context appengine.Context)(error){
 	}
 	return nil
 }
+
+func SaveMoves(r *http.Request) (error){
+	context := appengine.NewContext(r)
+	decoder := json.NewDecoder(r.Body)
+	games := make([]User_Game,0,30)
+
+
+	if err := decoder.Decode(&games); err != nil{
+		return err
+	}
+
+	keys := make([]*datastore.Key,len(games),len(games))
+	for i := 0; i < len(games); i++{
+		keys[i] = datastore.NewIncompleteKey(context, "User_Game",ParentDatastoreKey(context,"User_Game","saves"))
+	}
+
+	if _,errput := datastore.PutMulti(context,keys,games); errput != nil{
+		return errput;
+	}
+	return nil
+}

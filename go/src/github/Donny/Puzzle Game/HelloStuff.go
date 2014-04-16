@@ -20,6 +20,7 @@ func init(){
 	http.HandleFunc("/getSaveGame",handleGetSaveGame)
 	http.HandleFunc("/deleteGame",handleDeleteGame)
 	http.HandleFunc("/logout",handleLogout)
+	http.HandleFunc("/saveGames",handleSaveGames)
 }
 
 
@@ -69,4 +70,11 @@ func handleDeleteGame(rw http.ResponseWriter, r *http.Request){
 
 func handleLogout(rw http.ResponseWriter, r *http.Request){
 	UserGoogleLogout(rw,r)
+}
+
+func handleSaveGames(rw http.ResponseWriter, r *http.Request){
+	if err := SaveMoves(r); err != nil{
+		http.Error(rw,err.Error(),http.StatusInternalServerError)
+	}
+
 }

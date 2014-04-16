@@ -58,5 +58,8 @@ handlers:
 - url: /deleteGame
   script: HelloStuff.go
   
+- url: /saveGames
+  script: HelloStuff.go
+
 - url: /logout
   script: HelloStuff.go

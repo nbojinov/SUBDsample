@@ -133,10 +133,10 @@
               positions[i] = [images[img].x,images[img].y];
               i++;
             }
-            
+            ++move;
             var saveGame = {
               "Username_mail": mail,
-              "Move" : ++move,
+              "Move" : move,
               "Indexes" : indexes.toString(),
               "Positions": positions.toString()
             };
@@ -236,12 +236,14 @@
         if(img != null)
           goToFreeSpace(img);
 
-        useAjax("DELETE","/deleteGame?Username_mail=" + mail,null,null);
-            
-        for(var m = 0; m < move; m++){  
-          useAjax("POST","/saveGame",moves[m],null);
+      
+        
+        var temp = [];    
+        for(var i = 0; i < move; i++){
+            temp[i] = moves[i];
         }
-       
+
+        moves = temp;
 
         var i = 0;
         var positions = [];  
@@ -251,7 +253,7 @@
           positions[i] = [images[img].x,images[img].y];
           i++;
         }
-
+        move++;
         var savedMove = {
           "Username_mail": mail,
           "Move" :move,
@@ -259,10 +261,11 @@
           "Positions": positions.toString()
 
         }
-        useAjax("POST","/saveGame",savedMove,null);
         moves[move-1] = savedMove;
-        move++;
-
+        
+        useAjax("DELETE","/deleteGame?Username_mail=" + mail,null,function(){
+          useAjax("POST","/saveGames",moves,null);
+        });
         if(checkIfOrdered(images)){
           var json = {
               "Username_mail" : mail,
@@ -278,9 +281,6 @@
         $('#next').hide();
       });
 
-      $("#logout").click(function(){
-
-      });
    
     function redrawCanvas(images){
       var canvas = document.getElementById('Puzzle');
@@ -394,38 +394,71 @@
     }
 
     function checkIfOrdered(imgs){
-      var prev = 0;
-
-      for(var x = 0; x < 400; x += 200){
-        for(var img in imgs){
-          if(imgs[img].y == 0 && imgs[img].x == x){
-            if((imgs[img].num - 1) != prev){
-              return false;
-            } else prev=imgs[img].num
-          } 
-        }
+      for(var img in imgs){
+          if(imgs[img].num == 1){
+            if(imgs[img].x == 0 && imgs[img].y == 0){
+              break;
+            } else return false;
+          }
       }
 
-      for(var x = 0; x < 400; x += 200){
-        for(var img in imgs){
-          if(imgs[img].y == 200 && imgs[img].x == x){
-            if((imgs[img].num - 1) != prev){
-              return false;
-            } else prev=imgs[img].num
-          } 
-        }
-      }
-
-      for(var x = 0; x < 400; x += 200){
-        for(var img in imgs){
-          if(imgs[img].y == 400 && imgs[img].x == x){
-            if((imgs[img].num - 1) != prev){
-              return false;
-            } else prev=imgs[img].num
-          } 
-        }
+      for(var img in imgs){
+          if(imgs[img].num == 2){
+            if(imgs[img].x == 200 && imgs[img].y == 0){
+              break;
+            } else return false;
+          }
       }
       
+      for(var img in imgs){
+          if(imgs[img].num == 3){
+            if(imgs[img].x == 400 && imgs[img].y == 0){
+              break;
+            } else return false;
+          }
+      }
+
+      for(var img in imgs){
+          if(imgs[img].num == 4){
+            if(imgs[img].x == 0 && imgs[img].y == 200){
+              break;
+            } else return false;
+          }
+      }
+      
+      for(var img in imgs){
+          if(imgs[img].num == 5){
+            if(imgs[img].x == 200 && imgs[img].y == 200){
+              break;
+            } else return false;
+          }
+      }
+      
+      for(var img in imgs){
+          if(imgs[img].num == 6){
+            if(imgs[img].x == 400 && imgs[img].y == 200){
+              break;
+            } else return false;
+          }
+      }
+      
+      for(var img in imgs){
+          if(imgs[img].num == 7){
+            if(imgs[img].x == 0 && imgs[img].y == 400){
+              break;
+            } else return false;
+          }
+      }
+      
+      for(var img in imgs){
+          if(imgs[img].num == 8){
+            if(imgs[img].x == 200 && imgs[img].y == 400){
+              break;
+            } else return false;
+          }
+      }
+      
+
       return true;
     }
 
