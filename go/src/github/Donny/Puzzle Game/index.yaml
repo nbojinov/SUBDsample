@@ -16,6 +16,30 @@ indexes:
   - name: Date
     direction: desc
 
+- kind: Saved_Game
+  ancestor: yes
+  properties:
+  - name: Username_mail
+  - name: Game_num
+
+- kind: User_Game
+  ancestor: yes
+  properties:
+  - name: Game_num
+  - name: Move
+
+- kind: User_Game
+  ancestor: yes
+  properties:
+  - name: Game_num
+  - name: Username_mail
+  - name: Move
+
+- kind: User_Game
+  ancestor: yes
+  properties:
+  - name: Move
+
 - kind: User_Game
   ancestor: yes
   properties:

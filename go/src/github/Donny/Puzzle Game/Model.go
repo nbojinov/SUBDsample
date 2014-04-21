@@ -12,6 +12,7 @@ import(
 	"appengine/user"
 	"fmt"
 	"strings"
+	"strconv"
 )
 
 type Puzzles struct{
@@ -27,9 +28,16 @@ type HighScore struct{
 
 type User_Game struct{
 	Username_mail string
+	Game_num int
 	Move int
 	Indexes string
 	Positions string
+}
+
+type Saved_Game struct {
+	Username_mail string
+	Game string
+	Game_num int 
 }
 
 
@@ -177,34 +185,62 @@ func UploadGameSave(context appengine.Context, r *http.Request)( error ){
 }
 
 func GetGameSave(rw http.ResponseWriter,r *http.Request){
-	mail := strings.Split(r.URL.String(),"=")[1]
+
+
+
+	var mail string
+	var game_num int 
+	if cookie,err_mail := r.Cookie("dev_appserver_login"); err_mail != nil{
+		http.Error(rw,err_mail.Error(),http.StatusInternalServerError)
+		return
+	} else {
+		mail = strings.Split(cookie.Value,":")[0];
+		if cookie_game, err_game := r.Cookie("game_num"); err_game != nil{
+			http.Error(rw,err_game.Error(),http.StatusInternalServerError)
+			return
+		} else {
+			var err_conv error
+			game_num,err_conv = strconv.Atoi(cookie_game.Value)
+			if err_conv != nil{
+				http.Error(rw,err_conv.Error(),http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+
+
+
 	context := appengine.NewContext(r)
 	saves:= make([]User_Game,0,25)
 
 	q := datastore.NewQuery("User_Game").Ancestor(ParentDatastoreKey(context,"User_Game","saves")).
-			Filter("Username_mail=",mail).Order("Move")
+			Filter("Username_mail=",mail).Filter("Game_num=",game_num).Order("Move")
 
     if _,err := q.GetAll(context,&saves); err != nil{
     	http.Error(rw,err.Error(),http.StatusInternalServerError)
 	}
 
+	fmt.Fprintf(rw,string(game_num))
+	return 
 
 	save_game := ""
 	if(len(saves) != 0){
+	
+
 		save_data,errJson := json.Marshal(saves)
 		if errJson != nil{
 			http.Error(rw,errJson.Error(),http.StatusInternalServerError)
 		}
-	
+
 		save_game = fmt.Sprintf("%s",save_data)
 	}
 	rw.Header().Set("Content-type","application/json")
 	fmt.Fprintf(rw,save_game)
 }
 
-func DeleteMoves(mail string, context appengine.Context)(error){
+func DeleteMoves(mail string, game_num int, context appengine.Context)(error){
 	q := datastore.NewQuery("User_Game").Ancestor(ParentDatastoreKey(context,"User_Game","saves")).
-			Filter("Username_mail=",mail)
+			Filter("Username_mail=",mail).Filter("Game_num=",game_num)
 	saves := make([]User_Game,0,10)
 	if keys,err := q.GetAll(context,&saves); err == nil{
 		datastore.DeleteMulti(context,keys)
@@ -233,4 +269,103 @@ func SaveMoves(r *http.Request) (error){
 		return errput;
 	}
 	return nil
+}
+
+func GetSavedGames(r *http.Request) (string, error) {
+	context := appengine.NewContext(r)
+	var mail string
+	if cookie, err := r.Cookie("dev_appserver_login"); err != nil{
+		return "",err
+	} else {
+		mail = strings.Split(cookie.Value,":")[0];
+	}
+
+	q := datastore.NewQuery("Saved_Game").Ancestor(ParentDatastoreKey(context,"Saved_Game","games")).
+			Filter("Username_mail=",mail).Order("Game_num")
+
+	games := make([]Saved_Game,0,10)
+
+	if _,err := q.GetAll(context,&games); err != nil{
+		return "",err
+	}
+
+	saved_games := ""
+
+	if(len(games) != 0){
+		data, errJson := json.Marshal(games)
+		if errJson != nil{
+			return "",errJson
+		}
+
+		saved_games = fmt.Sprintf("%s",data)
+	}
+
+	return saved_games,nil
+}
+
+func SaveGame(r *http.Request)(error){
+	context := appengine.NewContext(r)
+
+	game := Saved_Game{}
+
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&game); err != nil{
+		return err
+	}
+	
+
+	newKey := datastore.NewIncompleteKey(context,"Saved_Game", ParentDatastoreKey(context,"Saved_Game","games"))
+	if _,err := datastore.Put(context, newKey, &game); err != nil{
+		return err
+	}
+
+	return nil
+}
+
+func GetGame(r *http.Request) (string,error){
+	context := appengine.NewContext(r)
+
+	var mail string
+	var game_num int
+
+	if cookie_mail, err_mail := r.Cookie("dev_appserver_login"); err_mail != nil{
+		return "",err_mail
+	} else {
+		mail = strings.Split(cookie_mail.Value,":")[0]
+		if cookie_game,err_game := r.Cookie("game_num"); err_game != nil{
+			return "",err_game
+		} else {
+			var errconv error
+			game_num,errconv = strconv.Atoi(cookie_game.Value)
+
+			if errconv != nil{
+				return "",errconv
+			}
+		}
+	}
+
+
+	q := datastore.NewQuery("User_Game").Ancestor(ParentDatastoreKey(context,"User_Game","saves")).
+			Filter("Username_mail=",mail).Filter("Game_num=",game_num).Order("Move")
+	
+
+	saved_games := make([]User_Game,0,10)
+
+	if _,errq := q.GetAll(context,&saved_games); errq != nil{
+		return "",errq
+	}
+
+
+	saved_data := ""
+	if len(saved_games) != 0{
+	
+		data, errJson := json.Marshal(saved_games)
+		if errJson != nil{
+			return "",errJson
+		}
+
+		saved_data = fmt.Sprintf("%s",data)
+	}
+	return saved_data,nil
 }

@@ -61,17 +61,26 @@ handlers:
   script: HelloStuff.go
   login: required
 
-- url: /getSaveGame
+- url: /getSavePuzzle
   script: HelloStuff.go
 
-- url: /saveGame
-  script: HelloStuff.go
-
-- url: /deleteGame
+- url: /getSavedGames
   script: HelloStuff.go
   
-- url: /saveGames
+- url: /saveMove
+  script: HelloStuff.go
+
+- url: /deleteMoves
+  script: HelloStuff.go
+  
+- url: /saveMoves
   script: HelloStuff.go
 
 - url: /logout
+  script: HelloStuff.go
+
+- url: /createGame
+  script: HelloStuff.go
+
+- url: /getSavedMoves
   script: HelloStuff.go

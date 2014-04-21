@@ -5,7 +5,22 @@
 <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-  <div class="container panel">
+
+  <div id="games" class="container" style='width:600px; height:100px;margin-top:50px'>
+    <div class="row" id="createdGames">
+
+    </div>
+    
+    <div class="row" id="createGame" >
+        <p><span>Name of the game:</span></p>
+        <input id="gameName" type="text" class="form-control form-group col-md-8">
+        <button id="createGameButton" class="form-group btn btn-sm btn-primary col-md-2 col-md-offset-10">Create game</button>
+    </div>
+
+  </div>
+
+
+  <div id="game" class="container">
   	<canvas class="row lead" id="Puzzle" width="600" height="600"></canvas><br/>
     <form action="/logout" method="POST">
       <input class="btn btn-default row col-md-4" type="submit" value="Logout" id="logout">
@@ -14,7 +29,7 @@
   
  
 
-  <div class="container" style="postion: relative;margin-left:750px;margin-top:-630px;">
+  <div id="moves" class="container" style="postion: relative;margin-left:750px;margin-top:-630px;">
     <table clas="row table tables-striped table-responsive" id="moveTable">
 
     </table><br/>
@@ -34,18 +49,27 @@
 
   <script id="moveTemplate" type="text/html">
       <tr data-move='{{Move}}' data-indexes='{{Indexes}}' data-pos='{{Positions}}'>
-          <td>{{Move}}</td> 
+          <td> Move: {{Move}}</td> 
       </tr>
 
+  </script>
+
+  <script id="gameTemplate" type="text/html">
+    <div class="panel panel-default">
+        <h4 class="clickable panetl-title" data-game="{{Game_num}}" data-type="game title">{{Game}}</h4>
+    </div>
   </script>
 
 	<script type="text/javascript">
   $.Mustache.addFromDom();
  
   var isSecond = 0;
-  var move = 1;
+  var move = 0;
   var moves = [];
+  var games = [];
   var nextHiden = false;
+
+
 	function ImgMovable(x,y,source){
 		this.image = null;
 		this.x = x;
@@ -55,10 +79,12 @@
 	}
   
 
-  var mail = document.cookie.split("=")[1].split(":")[0].replace("\"","");
+  var mail = document.cookie.split(";")[1].split("=")[1].split(":")[0].replace("\"","");
 
-      var images = {};
-      var start = new Date().getTime();
+
+
+  var images = {};
+  var start = new Date().getTime();
 	    function loadImages(sources,callback) {
         var numberOfSources = 0;
         var loadedImages = 0;
@@ -106,12 +132,26 @@
         luke: 'http://img4.wikia.nocookie.net/__cb20080319003050/starwars/nl/images/8/84/Lukeskywalker.jpg',
         jar_jar: 'http://media.comicbook.com/wp-content/uploads/2013/03/Jar-Jar-Binks-Top-Tenz.jpg'
       };
-          useAjax("GET","/getSaveGame?Username_mail=" + mail,null,function(data){
-            move = data ? data.length: 0;
-            moves = data;
-            $('#moveTable').mustache('moveTemplate',data);
-          });
   
+      if(document.cookie.indexOf("game_num") >= 0){
+
+        $('#games').hide();
+        useAjax("GET","/getSavedMoves",null,function(data){
+          move = data ? data.length: 0;
+          moves = data;
+          $('#moveTable').mustache('moveTemplate',data);
+          load();
+        });
+      } else {
+        $('#game').hide();
+        $('#moves').hide();
+        useAjax("GET","/getSavedGames",null,function(data){
+          games = data;
+          $("#createdGames").mustache('gameTemplate',data);
+        });
+      }
+
+      function load(){
         loadImages(sources,function(data){
           images = shuffle(images);
           var tempx = 0;
@@ -141,19 +181,20 @@
             var saveGame = {
               "Username_mail": mail,
               "Move" : move,
+              "Game_num" : parseInt(document.cookie.split(";")[2].split("=")[1]),
               "Indexes" : indexes.toString(),
               "Positions": positions.toString()
             };
-            useAjax("POST","/saveGame",saveGame,null);
-            useAjax("GET","/getSaveGame?Username_mail=" + mail,null,function(data){
+            useAjax("POST","/saveMove",saveGame,null);
+            useAjax("GET","/getSavedMoves",null,function(data){
                 $("#moveTable").empty();
                 $("#moveTable").mustache('moveTemplate',data);
             });
             moves[move-1] = saveGame;
           } else {
-            var element = $('[data-move=' + move + ']');
-            var indexes = JSON.parse("[" + element.first().data('indexes') + "]");
-            var pos = JSON.parse("[" + element.first().data('pos') + "]");
+            alert(moves[move-1].Positions);
+            var indexes = JSON.parse("[" + moves[move-1].Indexes +"]");
+            var pos = JSON.parse("[" + moves[move-1].Positions +"]");
 
             var posx, posy;
             for(var img in images){
@@ -169,10 +210,37 @@
             context.drawImage(images[src].image,images[src].x,images[src].y,200,200);
           }
       });    
+    }
+    $("#createGameButton").click(function(){
+        var game_num = games != null ? games.length + 1 : 1;
+      
+        document.cookie = "game_num=" + game_num + "; expires=Sunday,25 May 2014 02:00:00 UTC; path=/"; 
+        var game = {Username_mail:mail,Game:$('#gameName').val(),Game_num:game_num}
+        $('#gameName').empty();
+        useAjax("POST]","/createGame",game,function(){
+            $('#games').hide();
+            $('#game').show();
+            $('#moves').show();
+            load();
+        });
+    });
+    $('[data-type="game title"]').click(function(e){
+        var game_num = parseInt($(e).data("game"));
+        document.cookie = "game_num=" + game_num + "; expires=Sunday,25 May 2014 02:00:00 UTC; path=/"; 
+        useAjax("GET","/getSavedMoves",null,function(data){
+            move = data.length;
+            moves = data;
+            $('#games').hide();
+            $('#game').show();
+            $('#moves').show();
+            load();
+        });
+         
+    });
 
     $("#del").click(function(){
-      useAjax("DELETE","/deleteGame?Username_mail=" + mail,null,function(){
-        move = 1;
+      useAjax("DELETE","/deleteMoves",null,function(){
+        move = 0;
         $("#moveTable").empty();
       });
     });
@@ -183,9 +251,12 @@
         //$('td').css({color: 'black'});
         $('tr').animate({color: 'black'});
         $("[data-move="+move+"]").animate({color: 'red'});
-        var element = $('[data-move=' + move + ']');
-        var indexes = JSON.parse("[" + element.first().data('indexes') + "]");
-        var pos = JSON.parse("[" + element.first().data('pos') + "]");
+
+        
+        var indexes = JSON.parse("[" + moves[move-1].Indexes +"]");
+        var pos = JSON.parse("[" + moves[move-1].Positions +"]");
+
+
 
         for(var img in images){
           for(var i = 0; i < indexes.length; i++){
@@ -204,9 +275,12 @@
      
         $('tr').animate({color: 'black'});
         $("[data-move="+move+"]").animate({color: 'red'});
-        var element = $('[data-move=' + move + ']');
-        var indexes = JSON.parse("[" + element.first().data('indexes') + "]");
-        var pos = JSON.parse("[" + element.first().data('pos') + "]");
+
+
+        var indexes = JSON.parse("[" + moves[move-1].Indexes +"]");
+        var pos = JSON.parse("[" + moves[move-1].Positions +"]");
+
+
         if(nextHiden){
           $('#next').show();
         }
@@ -261,15 +335,16 @@
         var savedMove = {
           "Username_mail": mail,
           "Move" :move,
+          "Game_num" : parseInt(document.cookie.split(";")[2].split("=")[1]),
           "Indexes": indexes.toString(),
           "Positions": positions.toString()
 
         }
         moves[move-1] = savedMove;
         
-        useAjax("DELETE","/deleteGame?Username_mail=" + mail,null,function(){
-          useAjax("POST","/saveGames",moves,function(){
-            useAjax("GET","/getSaveGame?Username_mail="+mail,null,function(data){
+        useAjax("DELETE","/deleteMoves",null,function(){
+          useAjax("POST","/saveMoves",moves,function(){
+            useAjax("GET","/getSavedMoves",null,function(data){
               $("#moveTable").empty();
               $("#moveTable").mustache('moveTemplate',data);
             });
