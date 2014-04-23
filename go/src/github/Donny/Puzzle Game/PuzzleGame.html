@@ -33,9 +33,14 @@
     <table clas="row table tables-striped table-responsive" id="moveTable">
 
     </table><br/>
+
+    <div id="highscore" class="row">
+
+    </div>
     <button class="btn btn-defualt" id="prev">Prev</button>
     <button class="btn btn-defualt" id="next">Next</button>
     <button class="btn btn-defualt" id="del">Delete Game</button>
+    <button class="btn btn-primary" id="leave">Leave Game</button>
   </div>
 
 
@@ -58,6 +63,10 @@
     <div class="panel panel-default">
         <h4 class="clickable panetl-title" data-game="{{Game_num}}" data-type="game title">{{Game}}</h4>
     </div>
+  </script>
+
+  <script id="highscoreTemplate" type="text/html">
+    <span>{{Highscore}}</span>
   </script>
 
 	<script type="text/javascript">
@@ -147,6 +156,7 @@
         $('#moves').hide();
         useAjax("GET","/getSavedGames",null,function(data){
           games = data;
+          $("#createdGames").empty();
           $("#createdGames").mustache('gameTemplate',data);
         });
       }
@@ -213,11 +223,15 @@
     }
     $("#createGameButton").click(function(){
         var game_num = games != null ? games.length + 1 : 1;
-      
+        document.cookie = "game_num=; expires=Sunday,25 May 1980 00:00:00 UTC; path=";
         document.cookie = "game_num=" + game_num + "; expires=Sunday,25 May 2014 02:00:00 UTC; path=/"; 
+        moves = [];
+        move = 0;
+        games=[];
+
         var game = {Username_mail:mail,Game:$('#gameName').val(),Game_num:game_num}
         $('#gameName').empty();
-        useAjax("POST]","/createGame",game,function(){
+        useAjax("POST","/createGame",game,function(){
             $('#games').hide();
             $('#game').show();
             $('#moves').show();
@@ -226,6 +240,7 @@
     });
     $('[data-type="game title"]').click(function(e){
         var game_num = parseInt($(e).data("game"));
+        document.cookie = "game_num=; expires=Sunday,25 May 1980 00:00:00 UTC; path=";
         document.cookie = "game_num=" + game_num + "; expires=Sunday,25 May 2014 02:00:00 UTC; path=/"; 
         useAjax("GET","/getSavedMoves",null,function(data){
             move = data.length;
@@ -298,6 +313,18 @@
         
     });
 
+    $("#leave").click(function(){
+      document.cookie = "game_num=; expires=Sunday,25 May 1980 00:00:00 UTC; path=";
+      $('#games').show();
+      $('#game').hide();
+      $('#moves').hide();
+
+      useAjax("GET","/getSavedGames",null,function(data){
+        games = data;
+        $("#createdGames").mustache('gameTemplate',data);
+      });
+
+    });
 
     $("#Puzzle").click(function(){
         var img = null;
@@ -356,7 +383,10 @@
               "Username_mail" : mail,
               "Highscore" : ((new Date().getTime()) - start)*10
           }
-          useAjax("POST","/updateScore",json,null);
+          useAjax("POST","/updateScore",json,function(data){
+              $("#highscore").empty();
+              $("#highscore").mustache('highscoreTemplate',data);
+          });
         }
     
         nextHiden = true;
