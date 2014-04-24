@@ -16,7 +16,9 @@
         <input id="gameName" type="text" class="form-control form-group col-md-8">
         <button id="createGameButton" class="form-group btn btn-sm btn-primary col-md-2 col-md-offset-10">Create game</button>
     </div>
-
+    <form action="/logout" method="POST">
+      <input class="btn btn-default row col-md-4" type="submit" value="Logout" id="logout">
+    </form>
   </div>
 
 
@@ -61,7 +63,8 @@
 
   <script id="gameTemplate" type="text/html">
     <div class="panel panel-default">
-        <h4 class="clickable panetl-title" data-game="{{Game_num}}" data-type="game title">{{Game}}</h4>
+        <h4 class="panetl-title">{{Game}}</h4>
+        <button data-game="{{Game_num}}" onclick="chooseGame(this)" data-type='game button' class="clickable row btn btn-primary col-md-offset-9"> I choose this game </button>
     </div>
   </script>
 
@@ -238,20 +241,24 @@
             load();
         });
     });
-    $('[data-type="game title"]').click(function(e){
-        var game_num = parseInt($(e).data("game"));
-        document.cookie = "game_num=; expires=Sunday,25 May 1980 00:00:00 UTC; path=";
-        document.cookie = "game_num=" + game_num + "; expires=Sunday,25 May 2014 02:00:00 UTC; path=/"; 
-        useAjax("GET","/getSavedMoves",null,function(data){
-            move = data.length;
-            moves = data;
-            $('#games').hide();
-            $('#game').show();
-            $('#moves').show();
-            load();
-        });
-         
-    });
+
+
+      function chooseGame(e){
+            var game_num = parseInt($(e).data("game"));
+            document.cookie = "game_num=; expires=Sunday,25 May 1980 00:00:00 UTC; path=";
+            document.cookie = "game_num=" + game_num + "; expires=Sunday,25 May 2014 02:00:00 UTC; path=/"; 
+            useAjax("GET","/getSavedMoves",null,function(data){
+              move = data.length;
+              moves = data;
+              $('#games').hide();
+              $('#game').show();
+              $('#moves').show();
+              load();
+          
+            });
+      
+    }
+
 
     $("#del").click(function(){
       useAjax("DELETE","/deleteMoves",null,function(){
