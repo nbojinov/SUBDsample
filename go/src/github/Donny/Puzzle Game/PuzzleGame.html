@@ -16,17 +16,18 @@
         <input id="gameName" type="text" class="form-control form-group col-md-8">
         <button id="createGameButton" class="form-group btn btn-sm btn-primary col-md-2 col-md-offset-10">Create game</button>
     </div>
-    <form action="/logout" method="POST">
-      <input class="btn btn-default row col-md-4" type="submit" value="Logout" id="logout">
-    </form>
+    <button onclick="logout()" class="btn btn-default row col-md-4" id="logout">
+      Logout
+    </button>
   </div>
 
 
   <div id="game" class="container">
   	<canvas class="row lead" id="Puzzle" width="600" height="600"></canvas><br/>
-    <form action="/logout" method="POST">
-      <input class="btn btn-default row col-md-4" type="submit" value="Logout" id="logout">
-    </form>
+ 
+    <button onclick="logout()" class="btn btn-default row col-md-4" id="logout">
+      Logout
+    </button>
   </div>
   
  
@@ -148,6 +149,7 @@
       if(document.cookie.indexOf("game_num") >= 0){
 
         $('#games').hide();
+        $("#next").hide();
         useAjax("GET","/getSavedMoves",null,function(data){
           move = data ? data.length: 0;
           moves = data;
@@ -160,7 +162,9 @@
         useAjax("GET","/getSavedGames",null,function(data){
           games = data;
           $("#createdGames").empty();
-          $("#createdGames").mustache('gameTemplate',data);
+          if(data){
+            $("#createdGames").mustache('gameTemplate',data);
+          }
         });
       }
 
@@ -205,7 +209,7 @@
             });
             moves[move-1] = saveGame;
           } else {
-            alert(moves[move-1].Positions);
+            
             var indexes = JSON.parse("[" + moves[move-1].Indexes +"]");
             var pos = JSON.parse("[" + moves[move-1].Positions +"]");
 
@@ -254,7 +258,6 @@
               $('#game').show();
               $('#moves').show();
               load();
-          
             });
       
     }
@@ -323,11 +326,13 @@
     $("#leave").click(function(){
       document.cookie = "game_num=; expires=Sunday,25 May 1980 00:00:00 UTC; path=";
       $('#games').show();
+    
       $('#game').hide();
       $('#moves').hide();
 
       useAjax("GET","/getSavedGames",null,function(data){
         games = data;
+        $("#createdGames").empty();
         $("#createdGames").mustache('gameTemplate',data);
       });
 
@@ -399,7 +404,12 @@
         nextHiden = true;
         $('#next').hide();
       });
-
+    
+    function logout(){
+        document.cookie = "game_num=; expires=Sunday,25 May 1980 00:00:00 UTC; path=";
+        window.location.href = "/logout";
+        return false; 
+    }
    
     function redrawCanvas(images){
       var canvas = document.getElementById('Puzzle');
