@@ -41,5 +41,5 @@ As a result SQL queries+code in other programming language must be create
 Which are the Article(s) for a given Category
 As a result SQL query must be created
 
-Select Article.idArticle , Category.idCategory From Article INNER JOIN Tag ON Tag.article_id = Article.idArticle Inner Join Category ON Tag.cateroy_id = Category.idCategory;
+
 
