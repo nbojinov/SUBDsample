@@ -1,0 +1,6 @@
+Create table user_part1 (id int not null AUTO_INCREMENT, Primary Key(id), created_on Date);
+Create table user_part2 (id int not null AUTO_INCREMENT, Primary Key(id), description longtext, income float, CategoryID int, ArticleID int Unique);
+Insert into user_part1 SELECT id, created_on FROM User;
+Insert into user_part2 SELECT id, description, income, CategoryID, ArticleID FROM User;
+
+Drop table user;
