@@ -1,0 +1,34 @@
+Create database tasksTest;
+Use tasksTest;
+Create table Article(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,url varchar(80),published_on date,created_on date,c_id int);
+Create table Category(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,name varchar(30),created_by varchar(80));
+Create table User(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,description TEXT,picture_url varchar(80),created_on date);
+Create table Tag(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,priority int,name varchar(30));
+Create table T_U(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,t_id int,u_id int);
+
+Insert into Article(url,published_on,created_on,c_id) values ('dsfds','1992-1-1','1992-1-2',1),('sdfsdf','1992-1-3','1992-1-4',2);
+Insert into Category(name,created_by) values ('asdasd','dfsdf'),('assdfdagfdgsd','asdasf');
+Insert into User(description,picture_url,created_on) values ('dfsdf','fgdfg','1992-1-5'),('sdfsdfs','asdasdfd','1992-1-6');
+Insert into Tag(priority,name) values (10,'fdsfsf'),(12,'fsdfsdf');
+Insert into T_U(t_id,u_id) values (1,1),(2,2);
+
+Select Article.id From Tag,T_U,User,Article Where Tag.id=1 And Tag.id=T_U.t_id AND T_U.u_id=User.id AND User.id=Article.id;
++----+
+| id |
++----+
+|  1 |
++----+
+1 row in set (0.00 sec)
+
+Create table User_part1(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,picture_url varchar(80));
+Insert into User_part1(picture_url) select picture_url from User;
+Alter table User drop column picture_url;
+Rename table User to User_part2;
+
+Select Category.id From User_part1,Article,Category Where User_part1.id=2 And User_part1.id=Article.id AND Article.c_id=Category.id;
++----+
+| id |
++----+
+|  2 |
++----+
+1 row in set (0.00 sec)

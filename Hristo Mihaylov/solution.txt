@@ -1,0 +1,45 @@
+DROP DATABASE exam_database;
+CREATE DATABASE exam_database;
+USE exam_database;
+
+CREATE TABLE Article ( created_on DATE NOT NULL, price DECIMAL(15, 5) NOT NULL, published_on DATE NOT NULL, article_id INT NOT NULL PRIMARY KEY UNIQUE);
+CREATE TABLE Category ( name VARCHAR(30) NOT NULL, date_created_on DATE NOT NULL, category_id INT NOT NULL PRIMARY KEY UNIQUE);
+CREATE TABLE User ( password VARCHAR(30) NOT NULL, description LONGTEXT, income FLOAT(15, 5) NOT NULL, many_article_id INT NOT NULL, many_category_id INT NOT NULL);
+CREATE TABLE Tag ( description VARCHAR(30) NOT NULL, priority INT NOT NULL, tag_id INT NOT NULL PRIMARY KEY UNIQUE);
+CREATE TABLE category_tag (category_id INT NOT NULL, tag_id INT NOT NULL);
+
+ALTER TABLE User ADD CONSTRAINT FOREIGN KEY (many_article_id) REFERENCES Article (article_id);
+ALTER TABLE User ADD CONSTRAINT FOREIGN KEY (many_category_id) REFERENCES Category (category_id);
+ALTER TABLE category_tag ADD CONSTRAINT FOREIGN KEY (category_id) REFERENCES Category (category_id);
+ALTER TABLE category_tag ADD CONSTRAINT FOREIGN KEY (tag_id) REFERENCES Tag (tag_id);
+
+INSERT INTO Article VALUES ('1232-02-13', 12.43, '7621-11-17', 1);
+INSERT INTO Article VALUES ('2341-01-28', 12.32, '9102-03-12', 2);
+
+INSERT INTO Category VALUES ('haha', '7621-11-17', 1);
+INSERT INTO Category VALUES ('is', '721-04-08', 2);
+
+INSERT INTO User VALUES ('miss', 'miss', 13.23, 1, 1);
+INSERT INTO User VALUES ('good', 'too', 15.2, 2, 2);
+
+INSERT INTO Tag VALUES ('this', 8912, 1);
+INSERT INTO Tag VALUES ('good', 91784, 2);
+
+INSERT INTO category_tag VALUES (1, 1);
+INSERT INTO category_tag VALUES (2, 2);
+
+
+SELECT category_id FROM Category
+INNER JOIN User
+INNER JOIN Article
+WHERE Article.article_id = User.many_article_id
+AND User.many_category_id = Category.category_id;
+
+SELECT Tag.tag_id FROM Tag
+INNER JOIN Category
+INNER JOIN User
+INNER JOIN category_tag
+WHERE User.many_category_id = Category.category_id
+AND category_tag.category_id = Category.category_id
+AND category_tag.tag_id = Tag.tag_id;
+
