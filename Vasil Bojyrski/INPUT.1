@@ -1,0 +1,15 @@
+Create Table Article (id int not null AUTO_INCREMENT, Primary Key(id), created_on date, url varchar(128), price float);
+Create Table Category (id int not null AUTO_INCREMENT, Primary Key(id), date_created_on date, priority float);
+Create Table User (id int not null AUTO_INCREMENT, Primary Key(id), password varchar(64), picture_url varchar(128), description longtext);
+Create Table Tag (id int not null AUTO_INCREMENT, Primary Key(id), priority int, name varchar(32));
+
+Alter Table User Add Article_ID int;
+Alter Table User Add Category_ID int Unique;
+Alter Table Tag Add Category_ID int;
+
+Insert Into Article (created_on, url, price) values ("11.11.11", "www.google.com", 15.59), ("12.12.12", "none", 19.99);
+Insert Into Category (date_created_on, priority) values ("11.11.11", 1.5), ("12.12.12", 2.5);
+Insert Into User (password, picture_url, description, Article_ID, Category_ID) values ("gofuckyourself", "none", "User1", 1, 1), ("neserioznost", "home://aklass", "User2", 2, 2);
+Insert Into Tag (priority, name, Category_ID) values (15, "TAG 1 BABA", 2), (20, "TAG 2 MAIKA", 1);
+
+Select Article.id as "Article ID", Category.id as "Category ID" From User, Article, Category Where User.Article_ID = Article.id and User.Category_ID = Category.id;

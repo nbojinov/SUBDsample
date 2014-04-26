@@ -1,0 +1,9 @@
+Create Table User_part1 (id int not null AUTO_INCREMENT, Primary Key(id), description longtext);
+Create Table User_part2 (id int not null AUTO_INCREMENT, Primary Key(id), password varchar(64), picture_url varchar(128), Article_ID int, Category_ID int Unique);
+
+Insert Into User_part1 Select id, description From User;
+Insert Into User_part2 Select id, password, picture_url, Article_ID, Category_ID From User;
+
+Drop Table User;
+
+Select User_part2.id as "User ID", Tag.id as "Tag ID" From User_part2, Tag, Category Where User_part2.Category_ID = Category.id and Tag.Category_ID = Category.id;

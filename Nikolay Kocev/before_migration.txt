@@ -1,0 +1,19 @@
+Create schema 'nig_real'
+Create Table Article (id int not null AUTO_INCREMENT, Primary Key(id), url TEXT, name varchar(64), content LONGTEXT);
+Create Table Category (id int not null AUTO_INCREMENT, Primary Key(id), date_created_on date, created_by TEXT);
+Create Table User (id int not null AUTO_INCREMENT, Primary Key(id), created_on date, description LONGTEXT, income float);
+Create Table Tag (id int not null AUTO_INCREMENT, Primary Key(id), priority int, description varchar(64));
+
+Alter Table User Add CategoryID int;
+Alter Table User Add ArticleID int Unique;
+Alter Table Tag Add ArticleID int;
+
+Insert Into Tag (priority, description, ArticleID) values (11, "txt",  1), (13, "str",  1), (33, "cont",  2);
+Insert Into User (created_on, description, income, CategoryID, ArticleID) values ("10.11.12", "b", 6, ,  1), ("10.11.12", "txt", 13.37, ,  2);
+Insert Into Category (date_created_on, created_by) values ("12.12.12", "a"), ("11.11.11", "b");
+Insert Into Article (url, name, content) values ("b", "cont", "txt"), ("a", "a", "a");
+
+Select a.id
+From Article as a join user as u on u.ArticleId = a.id
+Join Category as c on u.CategoryId = c.id
+
